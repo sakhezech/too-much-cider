@@ -13,4 +13,7 @@ if __name__ == '__main__':
         os.system('clear||cls')
         print(frame)
         et = time.perf_counter()
-        time.sleep(0.033333 - (et - st))
+        try:
+            time.sleep(0.033333 - (et - st))
+        except ValueError:
+            pass
