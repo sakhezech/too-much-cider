@@ -63,7 +63,7 @@ def generate_randomart(img_path: Path) -> None:
             )
         )
     et = time.perf_counter()
-    print(f'finished {img_path.name} in {et-st:.2f}s.')
+    print(f'finished {img_path} in {et-st:.2f}s.')
 
 
 if __name__ == '__main__':
@@ -73,8 +73,9 @@ if __name__ == '__main__':
     OUTPUT_DIR.mkdir(exist_ok=True)
 
     with multiprocessing.Pool() as pool:
-        print(f'started with {os.cpu_count()} processes.')
         img_path = list(FRAMES_DIR.glob('*.png'))
+        img_path.sort()
+        print(f'started with {os.cpu_count()} processes.')
         st = time.perf_counter()
         pool.map(generate_randomart, img_path)
         et = time.perf_counter()
