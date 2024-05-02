@@ -6,17 +6,6 @@ from pathlib import Path
 from hashime import DrunkenBishop
 from PIL import Image
 
-# bishop population size
-POPULATION = 300
-# number of copies we will make of the surviving bishops
-CLONES = 6
-# number of surviving bishops
-SURVIVING = POPULATION // CLONES
-
-# input and output dirs
-FRAMES_DIR = Path('./frames/')
-OUTPUT_DIR = Path('./output/')
-
 
 def fitness(bishop: DrunkenBishop, frame: list[list[int]]) -> int:
     score = 0
@@ -29,8 +18,14 @@ def fitness(bishop: DrunkenBishop, frame: list[list[int]]) -> int:
     return score
 
 
-def generate_randomart(img_path: Path) -> None:
+def generate_randomart(
+    img_path: Path,
+    population: int,
+    clones: int,
+    output: Path,
+) -> None:
     st = time.perf_counter()
+    surviving = population // clones
     with Image.open(img_path).convert('1') as img:
         raw_data = list(img.getdata())  # type: ignore
         width = img.width
@@ -41,20 +36,24 @@ def generate_randomart(img_path: Path) -> None:
         return fitness(bishop, frame)
 
     bishops = [
-        DrunkenBishop(width=width, height=height) for _ in range(POPULATION)
+        DrunkenBishop(width=width, height=height) for _ in range(population)
     ]
     for _ in range(16):
         for bishop in bishops:
             bishop.update(random.randbytes(2))
         bishops.sort(key=frame_fitness, reverse=True)
-        slice = bishops[:SURVIVING]
+        slice = bishops[:surviving]
         bishops = slice
-        for _ in range(CLONES - 1):
+        for _ in range(clones - 1):
             bishops.extend(copy.deepcopy(slice))
     drunkest_bishop = bishops[0]
 
-    # ./frames/frame0001.png -> ./output/frame0001.txt
-    out_path = OUTPUT_DIR / img_path.with_suffix('.txt').name
+    if output.is_dir():
+        # ./frames/frame0001.png -> ./output/frame0001.txt
+        out_path = output / img_path.with_suffix('.txt').name
+    else:
+        out_path = output
+
     with out_path.open('w') as f:
         f.write(
             drunkest_bishop.to_art(
@@ -67,16 +66,66 @@ def generate_randomart(img_path: Path) -> None:
 
 
 if __name__ == '__main__':
+    import argparse
+    import functools
     import multiprocessing
     import os
 
-    OUTPUT_DIR.mkdir(exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--population',
+        metavar='POP',
+        type=int,
+        default=300,
+        help='number of nodes in population (defaults to 300)',
+    )
+    parser.add_argument(
+        '--clones',
+        type=int,
+        default=6,
+        help='number of clones of surviving nodes (defaults to 6)',
+    )
+    parser.add_argument(
+        '--input',
+        type=Path,
+        default=Path('./frames/'),
+        help='input file or directory (defaults to ./frames/)',
+    )
+    parser.add_argument(
+        '--output',
+        type=Path,
+        default=Path('./output/'),
+        help='output file or directory (defaults to ./output/)',
+    )
+    parser.add_argument(
+        '--processes',
+        metavar='PROCS',
+        type=int,
+        default=None,
+        help='number of spawned python processes'
+        ' (defaults to the number of cpu cores)',
+    )
+    args = parser.parse_args()
 
-    with multiprocessing.Pool() as pool:
-        img_path = list(FRAMES_DIR.glob('*.png'))
-        img_path.sort()
+    if args.input.is_dir():
+        img_paths = list(args.input.glob('*'))
+    else:
+        img_paths = [args.input]
+
+    if not args.output.exists() and args.input.is_dir():
+        args.output.mkdir(exist_ok=True)
+
+    func = functools.partial(
+        generate_randomart,
+        population=args.population,
+        clones=args.clones,
+        output=args.output,
+    )
+
+    with multiprocessing.Pool(args.processes) as pool:
+        img_paths.sort()
         print(f'started with {os.cpu_count()} processes.')
         st = time.perf_counter()
-        pool.map(generate_randomart, img_path)
+        pool.map(func, img_paths)
         et = time.perf_counter()
         print(f'done in {et - st:.2f}s.')
