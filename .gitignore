@@ -159,6 +159,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Input video and split frames
+# Input video, split frames, and output.
 input.webm
 frames*/
+output*/
