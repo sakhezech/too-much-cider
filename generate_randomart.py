@@ -1,6 +1,5 @@
 import copy
 import random
-import time
 from pathlib import Path
 
 from hashime import DrunkenBishop
@@ -24,7 +23,6 @@ def generate_randomart(
     surviving: int,
     output: Path,
 ) -> None:
-    st = time.perf_counter()
     clones = population // surviving
     with Image.open(img_path).convert('1') as img:
         raw_data = list(img.getdata())  # type: ignore
@@ -61,15 +59,13 @@ def generate_randomart(
                 bottom_text='SHA256',
             )
         )
-    et = time.perf_counter()
-    print(f'finished {img_path} in {et-st:.2f}s.')
 
 
 if __name__ == '__main__':
     import argparse
-    import functools
     import multiprocessing
     import os
+    import time
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -115,12 +111,16 @@ if __name__ == '__main__':
     if not args.output.exists() and args.input.is_dir():
         args.output.mkdir(exist_ok=True)
 
-    func = functools.partial(
-        generate_randomart,
-        population=args.population,
-        surviving=args.surviving,
-        output=args.output,
-    )
+    def func(img_path: Path) -> None:
+        st = time.perf_counter()
+        generate_randomart(
+            img_path,
+            population=args.population,
+            surviving=args.surviving,
+            output=args.output,
+        )
+        et = time.perf_counter()
+        print(f'finished {img_path} in {et-st:.2f}s.')
 
     with multiprocessing.Pool(args.processes) as pool:
         img_paths.sort()
