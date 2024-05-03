@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
     with multiprocessing.Pool(args.processes) as pool:
         img_paths.sort()
-        print(f'started with {os.cpu_count()} processes.')
+        print(f'started with {args.processes or os.cpu_count()} process(es).')
         st = time.perf_counter()
         pool.map(func, img_paths)
         et = time.perf_counter()
