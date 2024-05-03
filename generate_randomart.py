@@ -21,11 +21,11 @@ def fitness(bishop: DrunkenBishop, frame: list[list[int]]) -> int:
 def generate_randomart(
     img_path: Path,
     population: int,
-    clones: int,
+    surviving: int,
     output: Path,
 ) -> None:
     st = time.perf_counter()
-    surviving = population // clones
+    clones = population // surviving
     with Image.open(img_path).convert('1') as img:
         raw_data = list(img.getdata())  # type: ignore
         width = img.width
@@ -80,10 +80,10 @@ if __name__ == '__main__':
         help='number of nodes in population (defaults to 300)',
     )
     parser.add_argument(
-        '--clones',
+        '--surviving',
         type=int,
-        default=6,
-        help='number of clones of surviving nodes (defaults to 6)',
+        default=50,
+        help='number of surviving nodes (defaults to 50)',
     )
     parser.add_argument(
         '--input',
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     func = functools.partial(
         generate_randomart,
         population=args.population,
-        clones=args.clones,
+        surviving=args.surviving,
         output=args.output,
     )
 
