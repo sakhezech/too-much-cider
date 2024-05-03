@@ -1,4 +1,3 @@
-import copy
 import random
 from pathlib import Path
 
@@ -23,7 +22,6 @@ def generate_randomart(
     surviving: int,
     output: Path,
 ) -> None:
-    clones = population // surviving
     with Image.open(img_path).convert('1') as img:
         raw_data = list(img.getdata())  # type: ignore
         width = img.width
@@ -40,10 +38,16 @@ def generate_randomart(
         for bishop in bishops:
             bishop.update(random.randbytes(2))
         bishops.sort(key=frame_fitness, reverse=True)
-        slice = bishops[:surviving]
-        bishops = slice
-        for _ in range(clones - 1):
-            bishops.extend(copy.deepcopy(slice))
+        top_bishops = bishops[:surviving]
+        bad_bishops = bishops[surviving:]
+
+        for i, bad_bishop in enumerate(bad_bishops):
+            good_bishop = top_bishops[i % surviving]
+            bad_bishop._x = good_bishop._x
+            bad_bishop._y = good_bishop._y
+            bad_bishop._matrix = [
+                [v for v in row] for row in good_bishop._matrix
+            ]
     drunkest_bishop = bishops[0]
 
     if output.is_dir():
