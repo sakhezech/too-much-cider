@@ -82,12 +82,14 @@ if __name__ == '__main__':
         help='number of surviving nodes (defaults to 50)',
     )
     parser.add_argument(
+        '-i',
         '--input',
         type=Path,
         default=Path('./frames/'),
         help='input file or directory (defaults to ./frames/)',
     )
     parser.add_argument(
+        '-o',
         '--output',
         type=Path,
         default=Path('./output/'),
