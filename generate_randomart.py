@@ -16,12 +16,11 @@ def fitness(bishop: DrunkenBishop, frame: list[list[int]]) -> int:
     return score
 
 
-def generate_randomart(
+def get_drunkest_bishop(
     img_path: Path,
     population: int,
     surviving: int,
-    output: Path,
-) -> None:
+) -> DrunkenBishop:
     with Image.open(img_path).convert('1') as img:
         raw_data = list(img.getdata())  # type: ignore
         width = img.width
@@ -48,8 +47,15 @@ def generate_randomart(
             bad_bishop._matrix = [
                 [v for v in row] for row in good_bishop._matrix
             ]
-    drunkest_bishop = bishops[0]
+    return bishops[0]
 
+
+def write_randomart(
+    bishop: DrunkenBishop,
+    img_path: Path,
+    output: Path,
+    bottom_text: str,
+) -> None:
     if output.is_dir():
         # ./frames/frame0001.png -> ./output/frame0001.txt
         out_path = output / img_path.with_suffix('.txt').name
@@ -58,9 +64,9 @@ def generate_randomart(
 
     with out_path.open('w') as f:
         f.write(
-            drunkest_bishop.to_art(
+            bishop.to_art(
                 top_text=img_path.name,
-                bottom_text='SHA256',
+                bottom_text=bottom_text,
             )
         )
 
@@ -119,12 +125,12 @@ if __name__ == '__main__':
 
     def func(img_path: Path) -> None:
         st = time.perf_counter()
-        generate_randomart(
+        drunkest_bishop = get_drunkest_bishop(
             img_path,
             population=args.population,
             surviving=args.surviving,
-            output=args.output,
         )
+        write_randomart(drunkest_bishop, img_path, args.output, 'SHA256')
         et = time.perf_counter()
         print(f'finished {img_path} in {et-st:.2f}s.')
 
