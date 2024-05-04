@@ -76,14 +76,14 @@ if __name__ == '__main__':
         '--population',
         metavar='POP',
         type=int,
-        default=300,
-        help='number of nodes in population (defaults to 300)',
+        default=1000,
+        help='number of nodes in population (defaults to 1000)',
     )
     parser.add_argument(
         '--surviving',
         type=int,
-        default=50,
-        help='number of surviving nodes (defaults to 50)',
+        default=10,
+        help='number of surviving nodes (defaults to 10)',
     )
     parser.add_argument(
         '-i',
