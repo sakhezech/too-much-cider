@@ -109,20 +109,6 @@ if __name__ == '__main__':
         ' (defaults to 2)',
     )
     parser.add_argument(
-        '-i',
-        '--input',
-        type=Path,
-        default=Path('./frames/'),
-        help='input file or directory (defaults to ./frames/)',
-    )
-    parser.add_argument(
-        '-o',
-        '--output',
-        type=Path,
-        default=Path('./output/'),
-        help='output file or directory (defaults to ./output/)',
-    )
-    parser.add_argument(
         '--processes',
         metavar='PROCS',
         type=int,
@@ -136,6 +122,20 @@ if __name__ == '__main__':
         type=str,
         default=None,
         help='text on the bottom of the frame (defaults to None)',
+    )
+    parser.add_argument(
+        '-i',
+        '--input',
+        type=Path,
+        default=Path('./frames/'),
+        help='input file or directory (defaults to ./frames/)',
+    )
+    parser.add_argument(
+        '-o',
+        '--output',
+        type=Path,
+        default=Path('./output/'),
+        help='output file or directory (defaults to ./output/)',
     )
     args = parser.parse_args()
 
