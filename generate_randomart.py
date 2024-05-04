@@ -113,6 +113,13 @@ if __name__ == '__main__':
         help='number of spawned python processes'
         ' (defaults to the number of cpu cores)',
     )
+    parser.add_argument(
+        '--bottom_text',
+        metavar='TEXT',
+        type=str,
+        default=None,
+        help='text on the bottom of the frame (defaults to None)',
+    )
     args = parser.parse_args()
 
     if args.input.is_dir():
@@ -130,7 +137,12 @@ if __name__ == '__main__':
             population=args.population,
             surviving=args.surviving,
         )
-        write_randomart(drunkest_bishop, img_path, args.output, 'SHA256')
+        write_randomart(
+            drunkest_bishop,
+            img_path,
+            args.output,
+            args.bottom_text,
+        )
         et = time.perf_counter()
         print(f'finished {img_path} in {et-st:.2f}s.')
 
