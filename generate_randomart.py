@@ -20,6 +20,8 @@ def get_drunkest_bishop(
     img_path: Path,
     population: int,
     surviving: int,
+    generations: int,
+    bytes_fed: int,
 ) -> DrunkenBishop:
     with Image.open(img_path).convert('1') as img:
         raw_data = list(img.getdata())  # type: ignore
@@ -33,9 +35,9 @@ def get_drunkest_bishop(
     bishops = [
         DrunkenBishop(width=width, height=height) for _ in range(population)
     ]
-    for _ in range(16):
+    for _ in range(generations):
         for bishop in bishops:
-            bishop.update(random.randbytes(2))
+            bishop.update(random.randbytes(bytes_fed))
         bishops.sort(key=frame_fitness, reverse=True)
         top_bishops = bishops[:surviving]
         bad_bishops = bishops[surviving:]
@@ -92,6 +94,21 @@ if __name__ == '__main__':
         help='number of surviving nodes (defaults to 10)',
     )
     parser.add_argument(
+        '--generations',
+        metavar='GEN',
+        type=int,
+        default=16,
+        help='number of generations (defaults to 16)',
+    )
+    parser.add_argument(
+        '--bytes-fed',
+        metavar='BYTES',
+        type=int,
+        default=2,
+        help='number of bytes fed into the algorithm each generation'
+        ' (defaults to 2)',
+    )
+    parser.add_argument(
         '-i',
         '--input',
         type=Path,
@@ -136,6 +153,8 @@ if __name__ == '__main__':
             img_path,
             population=args.population,
             surviving=args.surviving,
+            generations=args.generations,
+            bytes_fed=args.bytes_fed,
         )
         write_randomart(
             drunkest_bishop,
