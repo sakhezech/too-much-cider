@@ -5,14 +5,19 @@ from hashime import DrunkenBishop
 from PIL import Image
 
 
-def fitness(bishop: DrunkenBishop, frame: list[list[int]]) -> int:
+def fitness(
+    bishop: DrunkenBishop,
+    frame: list[list[int]],
+    hit_score: int,
+    miss_score: int,
+) -> int:
     score = 0
     for bishop_row, frame_row in zip(bishop._matrix, frame):
         for bishop_val, frame_val in zip(bishop_row, frame_row):
             if bishop_val > 0 and frame_val > 0:
-                score += +10
+                score += hit_score
             elif bishop_val > 0 and frame_val == 0:
-                score += -20
+                score += miss_score
     return score
 
 
@@ -22,6 +27,8 @@ def get_drunkest_bishop(
     surviving: int,
     generations: int,
     bytes_fed: int,
+    hit_score: int,
+    miss_score: int,
 ) -> DrunkenBishop:
     with Image.open(img_path).convert('1') as img:
         raw_data = list(img.getdata())  # type: ignore
@@ -30,7 +37,7 @@ def get_drunkest_bishop(
     frame = [raw_data[i * width : (i + 1) * width] for i in range(height)]
 
     def frame_fitness(bishop: DrunkenBishop) -> int:
-        return fitness(bishop, frame)
+        return fitness(bishop, frame, hit_score, miss_score)
 
     bishops = [
         DrunkenBishop(width=width, height=height) for _ in range(population)
@@ -94,6 +101,20 @@ if __name__ == '__main__':
         help='number of surviving nodes (defaults to 10)',
     )
     parser.add_argument(
+        '--hit-score',
+        type=int,
+        default=10,
+        help='points added when randomart char falls in the frame stencil'
+        ' (defaults to 10)',
+    )
+    parser.add_argument(
+        '--miss-score',
+        type=int,
+        default=-20,
+        help="points added when randomart char doesn't fall in the frame"
+        ' stencil (defaults to -20)',
+    )
+    parser.add_argument(
         '--generations',
         metavar='GEN',
         type=int,
@@ -155,6 +176,8 @@ if __name__ == '__main__':
             surviving=args.surviving,
             generations=args.generations,
             bytes_fed=args.bytes_fed,
+            hit_score=args.hit_score,
+            miss_score=args.miss_score,
         )
         write_randomart(
             drunkest_bishop,
