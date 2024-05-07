@@ -138,7 +138,7 @@ if __name__ == '__main__':
         ' (defaults to the number of cpu cores)',
     )
     parser.add_argument(
-        '--bottom_text',
+        '--bottom-text',
         metavar='TEXT',
         type=str,
         default=None,
